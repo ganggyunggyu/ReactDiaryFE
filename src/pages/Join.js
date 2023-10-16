@@ -1,10 +1,11 @@
 /** @format */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from '../api/axios';
 import FormInput from '../components/FormInput';
 import FormHeader from '../components/FormHeader';
 import FormButton from '../components/FormButton';
+import { emailReg, passwordReg } from '../util/Regs';
 
 export default function Join() {
   const [email, setEmail] = useState('');
@@ -12,6 +13,13 @@ export default function Join() {
   const [confirmPassword, setContirmPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+
+  const [isPasswordReg, setIsPasswordReg] = useState(false);
+  const [isPasswordMatch, setIsPasswordMatch] = useState(false);
+  const [isEmailReg, setIsEmailReg] = useState(false);
+  const [isPhoneNumberCheck, setIsPhoneNumberCheck] = useState(false);
+
+  const [isJoinSubmitAble, setIsJoinSubmitAble] = useState(false);
 
   const FormItems = [
     {
@@ -61,6 +69,43 @@ export default function Join() {
     }
   };
 
+  const isTrim = (value) => {
+    return !!value.trim();
+  };
+
+  useEffect(() => {
+    setIsPasswordReg(passwordReg.test(password));
+    setIsPasswordMatch(password === confirmPassword);
+  }, [password, confirmPassword]);
+
+  useEffect(() => {
+    setIsEmailReg(emailReg.test(email));
+  }, [email]);
+  useEffect(() => {
+    if (phoneNumber.length === 13) {
+      setIsPhoneNumberCheck(true);
+    } else {
+      setIsPhoneNumberCheck(false);
+    }
+  }, [phoneNumber]);
+
+  useEffect(() => {
+    setIsJoinSubmitAble(
+      isEmailReg &&
+        isPasswordReg &&
+        isPasswordMatch &&
+        isPhoneNumberCheck &&
+        isTrim(displayName)
+    );
+    console.log('회원가입 조건 적합 : ', isJoinSubmitAble);
+  }, [
+    isEmailReg,
+    isPasswordReg,
+    isPasswordMatch,
+    isPhoneNumberCheck,
+    displayName,
+  ]);
+
   return (
     <div className='flex flex-col h-screen justify-center items-center'>
       <FormHeader text={'Sign up'} />
@@ -77,7 +122,11 @@ export default function Join() {
             />
           );
         })}
-        <FormButton submitFunc={isJoin} text={'Sigb up'} />
+        <FormButton
+          submitFunc={isJoin}
+          isSubmitAble={isJoinSubmitAble}
+          text={'Sigb up'}
+        />
       </form>
     </div>
   );

@@ -5,8 +5,10 @@ import FormHeader from '../components/FormHeader';
 import FormInput from '../components/FormInput';
 import FormButton from '../components/FormButton';
 import axios from '../api/axios';
+import { useNavigate } from 'react-router-dom';
 
-export default function Login() {
+export default function Login({ setUserInfo, setIsLogied }) {
+  const navigator = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const FormITems = [
@@ -20,11 +22,19 @@ export default function Login() {
   ];
   const isLogin = async () => {
     try {
-      const result = await axios.post('/auth/login', {
-        email: email,
-        password: password,
-      });
+      const result = await axios.post(
+        '/auth/login',
+        {
+          email: email,
+          password: password,
+        },
+        { withCredentials: true }
+      );
       console.log('로그인 요청 성공 : ', result);
+      if (result.status === 200) {
+        setIsLogied(true);
+        navigator('/');
+      }
     } catch (error) {
       console.log('로그인 요청 실패 : ', error);
     }
@@ -36,6 +46,7 @@ export default function Login() {
         {FormITems.map((el, i) => {
           return (
             <FormInput
+              key={i}
               value={el.value}
               setValue={el.setValue}
               type={el.type}
